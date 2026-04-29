@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICARUS — Crafting Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090a;--surface:#0f1208;--surface2:#151c0d;--surface3:#1b2411;
+  --border:#243318;--border2:#1a2512;--border3:#304020;
+  --text:#a8bc88;--dim:#4a5c34;--bright:#cce090;
+  --amber:#d08820;--amber2:#7a4c08;--amber3:#3a2204;
+  --green:#5aaa38;--green2:#2a5018;--green3:#162a0c;
+  --steel:#4a7898;--steel2:#1e3850;
+  --red:#c04030;--red2:#501a14;
+}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;font-size:15px}
+
+/* ─── HERO ─────────────────────────────────────────────── */
+.hero{
+  position:relative;width:100%;overflow:hidden;
+  background:#060a06;
+  border-bottom:2px solid var(--border3)
+}
+.hero-img{
+  display:block;width:100%;height:auto;
+  filter:brightness(.65) saturate(.9)
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.10) 3px,rgba(0,0,0,.10) 4px);
+  pointer-events:none;z-index:1
+}
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,transparent 40%,rgba(6,9,6,.85) 100%);
+  pointer-events:none;z-index:1
+}
+.hero-inner{position:absolute;bottom:0;left:0;right:0;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 24px 20px;z-index:2}
+.hero-badge{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--dim);margin-bottom:8px;text-transform:uppercase}
+.hero-title{font-size:30px;font-weight:700;letter-spacing:6px;color:var(--bright);text-shadow:0 0 30px rgba(160,220,60,.3),0 2px 4px rgba(0,0,0,.8);line-height:1}
+.hero-sub{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--dim);margin-top:6px;text-transform:uppercase}
+.hero-tag{
+  position:absolute;top:14px;right:18px;z-index:2;
+  font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px;
+  background:rgba(0,0,0,.5);border:1px solid var(--border);padding:4px 10px
+}
+.hero-corner{
+  position:absolute;top:0;left:0;width:60px;height:60px;z-index:2;
+  border-right:1px solid var(--border3);border-bottom:1px solid var(--border3)
+}
+.hero-corner::after{
+  content:'';position:absolute;top:12px;left:12px;width:8px;height:8px;
+  background:var(--green2);border:1px solid var(--green)
+}
+
+/* ─── TABS ──────────────────────────────────────────────── */
+.tab-bar{background:var(--surface);border-bottom:2px solid var(--border3);display:flex}
+.tab-btn{
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--dim);padding:12px 24px;cursor:pointer;border:none;background:transparent;
+  border-right:1px solid var(--border);transition:all .2s;position:relative
+}
+.tab-btn:hover{color:var(--text);background:var(--surface2)}
+.tab-btn.active{color:var(--amber);background:var(--bg)}
+.tab-btn.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--amber)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* ─── LAYOUT ────────────────────────────────────────────── */
+.container{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+.section-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ─── BASE PLANNER ──────────────────────────────────────── */
+.bp-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.bp-field{display:flex;flex-direction:column;gap:5px}
+.bp-input{
+  background:var(--surface2);border:1px solid var(--border);color:var(--amber);
+  padding:9px 12px;font-size:16px;font-family:'Share Tech Mono',monospace;font-weight:bold;
+  outline:none;transition:border-color .2s;width:100%
+}
+.bp-input:focus{border-color:var(--amber)}
+.bp-select{
+  background:var(--surface2);border:1px solid var(--border);color:var(--bright);
+  padding:9px 12px;font-size:13px;font-family:'Rajdhani',sans-serif;font-weight:600;
+  outline:none;transition:border-color .2s;width:100%;cursor:pointer;
+  -webkit-appearance:none;appearance:none
+}
+.bp-select:focus{border-color:var(--amber)}
+.bp-calc-btn{
+  background:var(--steel2);border:1px solid var(--steel);color:var(--steel);
+  padding:10px 28px;font-size:11px;font-family:'Share Tech Mono',monospace;letter-spacing:2px;
+  cursor:pointer;transition:background .2s;text-transform:uppercase;align-self:flex-end;height:40px
+}
+.bp-calc-btn:hover{background:#244860}
+.bp-summary{background:var(--surface);border:1px solid var(--border);margin-bottom:20px}
+.bp-summary-head{padding:10px 14px;border-bottom:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+.bp-summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.bp-stat{padding:12px 14px;border-right:1px solid var(--border2);border-bottom:1px solid var(--border2)}
+.bp-stat-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--dim);text-transform:uppercase;margin-bottom:4px}
+.bp-stat-value{font-size:18px;font-weight:700;color:var(--amber);font-family:'Share Tech Mono',monospace}
+.bp-stat-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);margin-top:2px}
+.bp-note{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--amber2);background:var(--amber3);border:1px solid var(--amber2);padding:8px 14px;margin-bottom:14px;letter-spacing:1px}
+#bp-results{display:none}
+#bp-results.visible{display:block}
+
+/* ─── SEARCH + ADD ──────────────────────────────────────── */
+.add-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end}
+.search-wrap{position:relative;flex:1;min-width:220px}
+label.field-label{display:block;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:5px;text-transform:uppercase}
+#item-search{
+  width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--bright);
+  padding:10px 14px;font-size:15px;font-family:'Rajdhani',sans-serif;font-weight:600;outline:none;
+  transition:border-color .2s
+}
+#item-search:focus{border-color:var(--amber)}
+#item-search::placeholder{color:var(--dim);font-weight:400}
+#dropdown{
+  display:none;position:absolute;top:100%;left:0;right:0;z-index:200;
+  background:var(--surface2);border:1px solid var(--border);border-top:none;
+  max-height:220px;overflow-y:auto
+}
+#dropdown.open{display:block}
+.dd-item{padding:8px 14px;font-size:13px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center}
+.dd-item:hover,.dd-item.active{background:var(--surface3);color:var(--amber)}
+.dd-station{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);padding-left:8px}
+.qty-wrap{display:flex;flex-direction:column;gap:5px}
+.stepper{display:flex;align-items:center}
+.step-btn{
+  background:var(--surface2);border:1px solid var(--border);color:var(--dim);
+  width:32px;height:38px;font-size:18px;cursor:pointer;line-height:1;transition:all .15s;
+  font-family:'Share Tech Mono',monospace;display:flex;align-items:center;justify-content:center
+}
+.step-btn:hover{background:var(--surface3);color:var(--amber);border-color:var(--amber)}
+#qty-input{
+  width:64px;background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);border-left:none;border-right:none;
+  color:var(--amber);padding:8px 6px;font-size:20px;font-family:'Share Tech Mono',monospace;
+  font-weight:bold;outline:none;text-align:center
+}
+.add-btn{
+  background:var(--green2);border:1px solid var(--green);color:var(--green);
+  padding:10px 22px;font-size:11px;font-family:'Share Tech Mono',monospace;letter-spacing:2px;
+  cursor:pointer;transition:background .2s;align-self:flex-end;height:38px;
+  text-transform:uppercase
+}
+.add-btn:hover{background:#305c1a}
+.add-btn:disabled{opacity:.4;cursor:default}
+
+/* ─── SESSION LIST ──────────────────────────────────────── */
+.session-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.session-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+.clear-btn{
+  background:transparent;border:1px solid var(--red2);color:var(--red);
+  padding:4px 12px;font-size:9px;font-family:'Share Tech Mono',monospace;letter-spacing:1px;
+  cursor:pointer;transition:all .2s;text-transform:uppercase
+}
+.clear-btn:hover{background:var(--red2)}
+#session-list{margin-bottom:20px}
+.session-empty{
+  border:1px dashed var(--border);padding:24px;text-align:center;
+  font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:2px
+}
+.session-item{
+  display:flex;align-items:center;background:var(--surface);border:1px solid var(--border2);
+  border-left:3px solid var(--amber2);margin-bottom:4px;padding:8px 12px;gap:10px
+}
+.session-item:hover{border-color:var(--border3);border-left-color:var(--amber)}
+.session-item-name{flex:1;font-size:14px;font-weight:600;color:var(--bright)}
+.session-item-station{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);margin-top:2px}
+.session-item-qty{
+  font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:bold;color:var(--amber);min-width:40px;text-align:center
+}
+.session-item-btns{display:flex;gap:4px}
+.edit-qty-btn,.remove-btn{
+  background:transparent;border:1px solid var(--border);color:var(--dim);
+  width:26px;height:26px;cursor:pointer;font-size:14px;transition:all .15s;
+  display:flex;align-items:center;justify-content:center
+}
+.edit-qty-btn:hover{border-color:var(--amber);color:var(--amber)}
+.remove-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* ─── RESULTS ───────────────────────────────────────────── */
+#results{display:none}
+#results.visible{display:block}
+.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:640px){.results-grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--border)}
+.panel-head{
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center
+}
+.panel-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+.panel-count{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--amber)}
+.panel-body{padding:10px 0}
+.mat-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:6px 14px;border-bottom:1px solid var(--border2)
+}
+.mat-row:last-child{border-bottom:none}
+.mat-name{font-size:13px;font-weight:600}
+.mat-name.gather{color:var(--green)}
+.mat-name.craft{color:var(--amber)}
+.mat-qty{
+  font-family:'Share Tech Mono',monospace;font-size:15px;font-weight:bold;
+  min-width:50px;text-align:right
+}
+.mat-qty.gather{color:var(--green)}
+.mat-qty.craft{color:var(--amber)}
+.mat-note{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);margin-top:1px}
+
+/* ─── CRAFTING STEPS ────────────────────────────────────── */
+.steps-section{margin-bottom:20px}
+.station-block{background:var(--surface);border:1px solid var(--border);margin-bottom:8px}
+.station-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 14px;border-bottom:1px solid var(--border2);cursor:pointer;
+  transition:background .15s;user-select:none
+}
+.station-head:hover{background:var(--surface2)}
+.station-name{
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--steel);
+  text-transform:uppercase;display:flex;align-items:center;gap:8px
+}
+.station-dot{width:8px;height:8px;background:var(--steel2);border:1px solid var(--steel)}
+.station-toggle{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim)}
+.station-body{padding:6px 0}
+.step-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:6px 14px 6px 28px;border-bottom:1px solid var(--border2)
+}
+.step-row:last-child{border-bottom:none}
+.step-row.target{padding-left:14px;border-left:3px solid var(--amber2)}
+.step-item{font-size:13px;font-weight:600;color:var(--text)}
+.step-item.target-item{color:var(--bright)}
+.step-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);margin-top:2px}
+.step-qty{font-family:'Share Tech Mono',monospace;font-size:16px;font-weight:bold;color:var(--amber);min-width:50px;text-align:right}
+
+/* ─── DIVIDER / NOTICE ──────────────────────────────────── */
+.notice{
+  border:1px solid var(--border);background:var(--surface);padding:10px 14px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:1px;
+  margin-bottom:20px;line-height:1.6
+}
+.notice b{color:var(--amber)}
+
+/* ─── SCROLLBAR ─────────────────────────────────────────── */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border3)}
+::-webkit-scrollbar-thumb:hover{background:var(--dim)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <img class="hero-img" src="banner.png" alt="JF After Hours Icarus Crafting Calculator">
+  <div class="hero-corner"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">Orbital Prospector Support Tool</div>
+    <div class="hero-title">ICARUS</div>
+    <div class="hero-sub">JF After Hours &nbsp;·&nbsp; Crafting Calculator &nbsp;&amp;&nbsp; Base Planner</div>
+  </div>
+  <div class="hero-tag">DATA: Community / Dec 2025 — Verify in-game</div>
+</header>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('crafting',this)">⚒ Crafting Calculator</button>
+  <button class="tab-btn" onclick="switchTab('base',this)">🏠 Base Planner</button>
+</div>
+
+<div class="container">
+
+<!-- ═══════════ TAB: CRAFTING CALCULATOR ═══════════ -->
+<div id="tab-crafting" class="tab-content active">
+
+  <div class="notice">
+    <b>HOW TO USE:</b> Search for an item, set the quantity, and click ADD TO SESSION.
+    Add multiple items to plan a full session. The shopping list will show everything you need to gather and craft.
+    Recipe data sourced from community — numbers may vary slightly from your game version.
+  </div>
+
+  <!-- ADD ITEM -->
+  <div class="section-label">Session Planner</div>
+  <div class="add-row">
+    <div class="search-wrap">
+      <label class="field-label">Search Item</label>
+      <input type="text" id="item-search" placeholder="e.g. Steel Axe, Concrete Wall..." autocomplete="off">
+      <div id="dropdown"></div>
+    </div>
+    <div class="qty-wrap">
+      <label class="field-label">Quantity</label>
+      <div class="stepper">
+        <button class="step-btn" id="qty-down">−</button>
+        <input type="number" id="qty-input" value="1" min="1" max="9999">
+        <button class="step-btn" id="qty-up">+</button>
+      </div>
+    </div>
+    <button class="add-btn" id="add-btn" disabled>+ Add to Session</button>
+  </div>
+
+  <!-- SESSION LIST -->
+  <div class="session-header">
+    <div class="session-title">Current Session</div>
+    <button class="clear-btn" id="clear-btn">Clear All</button>
+  </div>
+  <div id="session-list"><div class="session-empty">No items added yet — search above to begin</div></div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="section-label">Shopping List</div>
+    <div class="results-grid">
+      <div class="panel" id="gather-panel">
+        <div class="panel-head">
+          <div class="panel-title">Gather</div>
+          <div class="panel-count" id="gather-count">—</div>
+        </div>
+        <div class="panel-body" id="gather-list"></div>
+      </div>
+      <div class="panel" id="craft-panel">
+        <div class="panel-head">
+          <div class="panel-title">Intermediate Crafts</div>
+          <div class="panel-count" id="craft-count">—</div>
+        </div>
+        <div class="panel-body" id="craft-list"></div>
+      </div>
+    </div>
+
+    <div class="section-label">Crafting Steps by Station</div>
+    <div class="steps-section" id="steps-section"></div>
+  </div>
+
+</div><!-- end tab-crafting -->
+
+<!-- ═══════════ TAB: BASE PLANNER ═══════════ -->
+<div id="tab-base" class="tab-content">
+
+  <div class="notice">
+    <b>BASE PLANNER:</b> Enter your building dimensions in wall segments (e.g. 4 wide × 6 long × 2 stories).
+    The planner calculates every piece and drills down to raw materials.
+    Gable end pieces for pitched roofs are approximate — add ~10% buffer.
+  </div>
+
+  <div class="section-label">Building Configuration</div>
+  <div class="bp-form">
+    <div class="bp-field">
+      <label class="field-label">Material Tier</label>
+      <select class="bp-select" id="bp-tier">
+        <option value="thatch">Thatch</option>
+        <option value="wood" selected>Wood</option>
+        <option value="stone">Stone</option>
+        <option value="concrete">Concrete</option>
+      </select>
+    </div>
+    <div class="bp-field">
+      <label class="field-label">Width (segments)</label>
+      <input class="bp-input" type="number" id="bp-w" value="4" min="1" max="100">
+    </div>
+    <div class="bp-field">
+      <label class="field-label">Length (segments)</label>
+      <input class="bp-input" type="number" id="bp-l" value="6" min="1" max="100">
+    </div>
+    <div class="bp-field">
+      <label class="field-label">Height (stories)</label>
+      <input class="bp-input" type="number" id="bp-h" value="1" min="1" max="10">
+    </div>
+    <div class="bp-field">
+      <label class="field-label">Roof Type</label>
+      <select class="bp-select" id="bp-roof" onchange="toggleRidgeDir()">
+        <option value="flat">Flat</option>
+        <option value="pitched">Pitched</option>
+      </select>
+    </div>
+    <div class="bp-field" id="bp-ridge-wrap" style="display:none">
+      <label class="field-label">Ridge Runs Along</label>
+      <select class="bp-select" id="bp-ridge">
+        <option value="length">Length</option>
+        <option value="width">Width</option>
+      </select>
+    </div>
+    <div class="bp-field">
+      <label class="field-label">Number of Doors</label>
+      <input class="bp-input" type="number" id="bp-doors" value="1" min="0" max="100">
+    </div>
+    <div class="bp-field" style="justify-content:flex-end">
+      <button class="bp-calc-btn" onclick="calculateBase()">Calculate →</button>
+    </div>
+  </div>
+
+  <div id="bp-results">
+    <div class="section-label">Building Summary</div>
+    <div class="bp-summary">
+      <div class="bp-summary-head">Piece Breakdown</div>
+      <div class="bp-summary-grid" id="bp-summary-grid"></div>
+    </div>
+
+    <div id="bp-gable-note" class="bp-note" style="display:none">
+      ⚠ Gable end pieces are approximate. The triangular peak sections require additional wall + roof pieces not fully calculable without knowing your exact roof pitch design.
+    </div>
+
+    <div class="section-label">Raw Materials to Gather</div>
+    <div class="results-grid">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Gather</div>
+          <div class="panel-count" id="bp-gather-count">—</div>
+        </div>
+        <div class="panel-body" id="bp-gather-list"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Intermediate Crafts</div>
+          <div class="panel-count" id="bp-craft-count">—</div>
+        </div>
+        <div class="panel-body" id="bp-craft-list"></div>
+      </div>
+    </div>
+
+    <div class="section-label">Crafting Steps by Station</div>
+    <div class="steps-section" id="bp-steps-section"></div>
+  </div>
+
+</div><!-- end tab-base -->
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+//  RECIPE DATA
+//  Each item: { name, station, output, ingredients: [{item, qty}] }
+//  Raw materials: { name, raw: true }
+//  output = how many you get per single craft
+// ═══════════════════════════════════════════════════════════════════════════
+const ITEMS = {
+
+  // ── BUILDING PIECES — THATCH (Character Crafting) ──────────────────────
+  thatch_wall:  { name:"Thatch Wall",  station:"Character", output:1, ingredients:[{item:"fiber",qty:20},{item:"stick",qty:3}] },
+  thatch_floor: { name:"Thatch Floor", station:"Character", output:1, ingredients:[{item:"fiber",qty:20},{item:"stick",qty:3}] },
+  thatch_roof:  { name:"Thatch Roof",  station:"Character", output:1, ingredients:[{item:"fiber",qty:20},{item:"stick",qty:3}] },
+  thatch_door:  { name:"Thatch Door",  station:"Character", output:1, ingredients:[{item:"fiber",qty:10},{item:"stick",qty:4}] },
+
+  // ── BUILDING PIECES — WOOD (Character Crafting) ─────────────────────────
+  wood_wall:    { name:"Wood Wall",    station:"Character", output:1, ingredients:[{item:"wood",qty:20},{item:"fiber",qty:12}] },
+  wood_floor:   { name:"Wood Floor",   station:"Character", output:1, ingredients:[{item:"wood",qty:20},{item:"fiber",qty:12}] },
+  wood_roof:    { name:"Wood Roof",    station:"Character", output:1, ingredients:[{item:"wood",qty:20},{item:"fiber",qty:12}] },
+  wood_door:    { name:"Wood Door",    station:"Character", output:1, ingredients:[{item:"wood",qty:10},{item:"fiber",qty:8}] },
+  wood_ladder:  { name:"Wood Ladder",  station:"Character", output:1, ingredients:[{item:"wood",qty:10},{item:"fiber",qty:6}] },
+
+  // ── BUILDING PIECES — STONE (Masonry Bench) ─────────────────────────────
+  stone_wall:   { name:"Stone Wall",   station:"Masonry Bench", output:1, ingredients:[{item:"stone",qty:20},{item:"wood",qty:6},{item:"leather",qty:4},{item:"iron_nail",qty:6}] },
+  stone_floor:  { name:"Stone Floor",  station:"Masonry Bench", output:1, ingredients:[{item:"stone",qty:20},{item:"wood",qty:6},{item:"leather",qty:4},{item:"iron_nail",qty:6}] },
+  stone_roof:   { name:"Stone Roof",   station:"Masonry Bench", output:1, ingredients:[{item:"stone",qty:20},{item:"wood",qty:6},{item:"leather",qty:4},{item:"iron_nail",qty:6}] },
+  stone_door:   { name:"Stone Door",   station:"Masonry Bench", output:1, ingredients:[{item:"stone",qty:20},{item:"wood",qty:6},{item:"leather",qty:4},{item:"iron_nail",qty:6}] },
+
+  // ── BUILDING PIECES — CONCRETE (Cement Mixer / Machining Bench) ─────────
+  // concrete_wall, concrete_floor, concrete_door already defined below
+  steel_roofing:{ name:"Steel Roofing (Concrete Roof)", station:"Machining Bench", output:1, ingredients:[{item:"steel_rebar",qty:6},{item:"steel_ingot",qty:1},{item:"steel_screw",qty:2}] },
+
+  // ── RAW MATERIALS ──────────────────────────────────────────────────────
+  iron_ore:       { name:"Iron Ore",       raw:true },
+  copper_ore:     { name:"Copper Ore",     raw:true },
+  gold_ore:       { name:"Gold Ore",       raw:true },
+  aluminum_ore:   { name:"Aluminum Ore",   raw:true },
+  platinum_ore:   { name:"Platinum Ore",   raw:true },
+  titanium_ore:   { name:"Titanium Ore",   raw:true },
+  coal_ore:       { name:"Coal Ore",       raw:true },
+  silica_ore:     { name:"Silica Ore",     raw:true },
+  obsidian:       { name:"Obsidian",       raw:true },
+  scoria:         { name:"Scoria",         raw:true },
+  clay:           { name:"Clay",           raw:true },
+  sand:           { name:"Sand",           raw:true },
+  frozen_ore:     { name:"Frozen Ore",     raw:true },
+  frozen_wood:    { name:"Frozen Wood",    raw:true },
+  stone:          { name:"Stone",          raw:true },
+  wood:           { name:"Wood",           raw:true },
+  stick:          { name:"Stick",          raw:true },
+  fiber:          { name:"Fiber",          raw:true },
+  leather:        { name:"Leather",        raw:true },
+  fur:            { name:"Fur",            raw:true },
+  wool:           { name:"Wool",           raw:true },
+  bone:           { name:"Bone",           raw:true },
+  charcoal:       { name:"Charcoal",       raw:true },
+  tree_sap:       { name:"Tree Sap",       raw:true },
+  oxite:          { name:"Oxite",          raw:true },
+  sulfur:         { name:"Sulfur",         raw:true },
+  wheat:          { name:"Wheat",          raw:true },
+  honeycomb:      { name:"Honeycomb",      raw:true },
+  seeds:          { name:"Seeds",          raw:true },
+  wild_berry:     { name:"Wild Berry",     raw:true },
+  coffee_bean:    { name:"Coffee Bean",    raw:true },
+  gorse_flower:   { name:"Gorse Flower",   raw:true },
+  lily:           { name:"Lily",           raw:true },
+  reed:           { name:"Reed",           raw:true },
+  sponge:         { name:"Sponge",         raw:true },
+  yeast:          { name:"Yeast",          raw:true },
+  milk:           { name:"Milk",           raw:true },
+  cream:          { name:"Cream",          raw:true },
+  salt:           { name:"Salt",           raw:true },
+  water:          { name:"Water",          raw:true },
+  sugar_cane:     { name:"Sugar Cane",     raw:true },
+  dirt:           { name:"Dirt",           raw:true },
+  animal_fat:     { name:"Animal Fat",     raw:true },
+  guano:          { name:"Guano",          raw:true },
+  spoiled_meat:   { name:"Spoiled Meat",   raw:true },
+  spoiled_plant:  { name:"Spoiled Plant",  raw:true },
+  carcass:        { name:"Carcass",        raw:true },
+  worm_scale:         { name:"Worm Scale",         raw:true },
+  poison_sack:        { name:"Poison Sack",         raw:true },
+  ice_armor_fragment: { name:"Ice Armor Fragment",  raw:true },
+  frozen_wool:        { name:"Frozen Wool",         raw:true },
+  black_wolf_fur:     { name:"Black Wolf Fur",      raw:true },
+  black_wolf_tooth:   { name:"Black Wolf Tooth",    raw:true },
+  black_wolf_vestige: { name:"Black Wolf Vestige",  raw:true },
+  brown_bear_vestige: { name:"Brown Bear Vestige",  raw:true },
+  scorpion_vestige:   { name:"Scorpion Vestige",    raw:true },
+  venom_sac:          { name:"Venom Sac",           raw:true },
+  treep_sap:          { name:"Treep Sap",           raw:true },
+  condensed_enzymes:  { name:"Condensed Enzymes",   raw:true },
+  mammoth_tusk:       { name:"Mammoth Tusk",        raw:true },
+  platinum_sheath:    { name:"Platinum Sheath",     raw:true },
+  distilled_miasmic:  { name:"Distilled Miasmic Coating", raw:true },
+  garganutan_tendon:  { name:"Garganutan Tendon",   raw:true },
+  super_cooled_ice:   { name:"Super Cooled Ice",    raw:true },
+  ammonia:            { name:"Ammonia",             raw:true },
+  basic_fertilizer:   { name:"Basic Fertilizer",   raw:true },
+  // Refined Wood: made at Carpentry Bench but recipe TBC; mark raw for now
+  refined_wood:       { name:"Refined Wood",        raw:true },
+  // Cured Leather: Salting Station, but recipe TBC
+  cured_leather:      { name:"Cured Leather",       raw:true },
+  paint:              { name:"Paint",               raw:true },
+
+  // ── STONE FURNACE / CONCRETE FURNACE ───────────────────────────────────
+  iron_ingot: {
+    name:"Iron Ingot", station:"Furnace", output:1,
+    ingredients:[{item:"iron_ore",qty:2}]
+  },
+  copper_ingot: {
+    name:"Copper Ingot", station:"Furnace", output:1,
+    ingredients:[{item:"copper_ore",qty:2}]
+  },
+  aluminum_ingot: {
+    name:"Aluminum Ingot", station:"Concrete Furnace", output:1,
+    ingredients:[{item:"aluminum_ore",qty:1}]
+  },
+  titanium_ingot: {
+    name:"Titanium Ingot", station:"Concrete Furnace", output:1,
+    ingredients:[{item:"titanium_ore",qty:5}]
+  },
+  platinum_ingot: {
+    name:"Platinum Ingot", station:"Concrete Furnace", output:1,
+    ingredients:[{item:"platinum_ore",qty:5}]
+  },
+  refined_gold: {
+    name:"Refined Gold", station:"Concrete Furnace", output:1,
+    ingredients:[{item:"gold_ore",qty:2}]
+  },
+  steel_ingot: {
+    name:"Steel Ingot", station:"Concrete Furnace", output:1,
+    ingredients:[{item:"steel_bloom",qty:1}]
+  },
+  shaped_obsidian: {
+    name:"Shaped Obsidian", station:"Concrete Furnace", output:1,
+    ingredients:[{item:"obsidian",qty:2}]
+  },
+  glass: {
+    name:"Glass", station:"Concrete Furnace", output:1,
+    ingredients:[{item:"silica_ore",qty:1}]
+  },
+  scoria_brick: {
+    name:"Scoria Brick", station:"Concrete Furnace", output:5,
+    ingredients:[{item:"scoria",qty:1}]
+  },
+  clay_brick: {
+    name:"Clay Brick", station:"Concrete Furnace", output:5,
+    ingredients:[{item:"clay",qty:1}]
+  },
+  cold_steel_ingot: {
+    name:"Cold Steel Ingot", station:"Concrete Furnace", output:1,
+    ingredients:[{item:"steel_ingot",qty:1},{item:"super_cooled_ice",qty:1}]
+  },
+  carbon_fiber: {
+    name:"Carbon Fiber", station:"Concrete Furnace", output:1,
+    ingredients:[{item:"carbon_paste",qty:1}]
+  },
+
+  // ── MORTAR & PESTLE ─────────────────────────────────────────────────────
+  steel_bloom: {
+    name:"Steel Bloom", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"iron_ore",qty:6},{item:"coal_ore",qty:1}]
+  },
+  epoxy: {
+    name:"Epoxy", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"sulfur",qty:2},{item:"tree_sap",qty:4}]
+  },
+  organic_resin: {
+    name:"Organic Resin", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"wood",qty:1},{item:"oxite",qty:1}]
+  },
+  gunpowder: {
+    name:"Gunpowder", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"charcoal",qty:3},{item:"sulfur",qty:1}]
+  },
+  volatile_substance: {
+    name:"Volatile Substance", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"gunpowder",qty:2},{item:"oxite",qty:2},{item:"spoiled_plant",qty:2}]
+  },
+  carbon_paste: {
+    name:"Carbon Paste", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"aluminum_ingot",qty:1},{item:"epoxy",qty:2},{item:"organic_resin",qty:4},{item:"silica_ore",qty:1}]
+  },
+  crushed_bone: {
+    name:"Crushed Bone", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"bone",qty:2}]
+  },
+  poison_paste: {
+    name:"Poison Paste", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"spoiled_meat",qty:2},{item:"sulfur",qty:1}]
+  },
+  beeswax: {
+    name:"Beeswax", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"honeycomb",qty:2}]
+  },
+  honey: {
+    name:"Honey", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"honeycomb",qty:2}]
+  },
+  butter: {
+    name:"Butter", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"cream",qty:3},{item:"salt",qty:3}]
+  },
+  flour: {
+    name:"Flour", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"wheat",qty:10}]
+  },
+  sugar_cubes: {
+    name:"Sugar Cubes", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"sugar_cane",qty:5}]
+  },
+
+  // ── CRAFTING BENCH ──────────────────────────────────────────────────────
+  rope: {
+    name:"Rope", station:"Crafting Bench", output:1,
+    ingredients:[{item:"fiber",qty:12}]
+  },
+  mortar_and_pestle: {
+    name:"Mortar & Pestle", station:"Crafting Bench", output:1,
+    ingredients:[{item:"stone",qty:12},{item:"silica_ore",qty:4}]
+  },
+  stone_furnace: {
+    name:"Stone Furnace", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:12},{item:"stone",qty:80},{item:"stick",qty:4},{item:"leather",qty:12}]
+  },
+  fireplace: {
+    name:"Fireplace", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:30},{item:"stone",qty:120}]
+  },
+  wall_torch: {
+    name:"Wall Torch", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:4},{item:"sulfur",qty:8},{item:"leather",qty:8},{item:"iron_ingot",qty:8}]
+  },
+  cooking_station: {
+    name:"Cooking Station", station:"Crafting Bench", output:1,
+    ingredients:[{item:"stone",qty:24},{item:"fiber",qty:8},{item:"iron_ingot",qty:4},{item:"stick",qty:8}]
+  },
+  wood_composter: {
+    name:"Wood Composter", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:25},{item:"stone",qty:10},{item:"spoiled_plant",qty:5},{item:"sulfur",qty:5}]
+  },
+  anvil_bench: {
+    name:"Anvil Bench", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:20},{item:"stone",qty:10},{item:"iron_ingot",qty:40}]
+  },
+  machining_bench: {
+    name:"Machining Bench", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:20},{item:"stone",qty:12},{item:"rope",qty:24},{item:"iron_nail",qty:120},{item:"iron_ingot",qty:40},{item:"epoxy",qty:10}]
+  },
+  herbalism_bench: {
+    name:"Herbalism Bench", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:50},{item:"stone",qty:12},{item:"stick",qty:20},{item:"fiber",qty:60}]
+  },
+  textiles_bench: {
+    name:"Textiles Bench", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:50},{item:"stone",qty:12},{item:"stick",qty:20},{item:"fiber",qty:60}]
+  },
+  decoration_bench: {
+    name:"Decoration Bench", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:50},{item:"stone",qty:12},{item:"leather",qty:20},{item:"fiber",qty:60}]
+  },
+  skinning_bench: {
+    name:"Skinning Bench", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:50},{item:"stone",qty:12},{item:"leather",qty:20},{item:"fiber",qty:60}]
+  },
+  salting_station: {
+    name:"Salting Station", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:50},{item:"stone",qty:25},{item:"charcoal",qty:25},{item:"fiber",qty:60}]
+  },
+  carpentry_bench: {
+    name:"Carpentry Bench", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:80},{item:"copper_nail",qty:120}]
+  },
+  masonry_bench: {
+    name:"Masonry Bench", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:80},{item:"rope",qty:12},{item:"leather",qty:12},{item:"iron_nail",qty:120}]
+  },
+  ranching_station: {
+    name:"Ranching Station", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:30},{item:"rope",qty:10},{item:"leather",qty:20},{item:"fur",qty:10},{item:"iron_nail",qty:15}]
+  },
+  basic_fishing_bench: {
+    name:"Basic Fishing Bench", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:25},{item:"copper_nail",qty:12},{item:"iron_ingot",qty:5}]
+  },
+  contact_device: {
+    name:"Contact Device", station:"Crafting Bench", output:1,
+    ingredients:[{item:"rope",qty:8},{item:"wood",qty:10},{item:"iron_ingot",qty:15}]
+  },
+  orbital_exchange: {
+    name:"Orbital Exchange", station:"Crafting Bench", output:1,
+    ingredients:[{item:"rope",qty:8},{item:"wood",qty:10},{item:"iron_ingot",qty:7},{item:"copper_ingot",qty:7}]
+  },
+
+  // ── ANVIL BENCH ─────────────────────────────────────────────────────────
+  iron_nail: {
+    name:"Iron Nail", station:"Anvil Bench", output:4,
+    ingredients:[{item:"iron_ingot",qty:1}]
+  },
+  copper_nail: {
+    name:"Copper Nail", station:"Anvil Bench", output:4,
+    ingredients:[{item:"copper_ingot",qty:1}]
+  },
+  iron_axe: {
+    name:"Iron Axe", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:5},{item:"leather",qty:4},{item:"iron_ingot",qty:6},{item:"iron_nail",qty:2}]
+  },
+  iron_pickaxe: {
+    name:"Iron Pickaxe", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:5},{item:"leather",qty:4},{item:"iron_ingot",qty:6}]
+  },
+  iron_knife: {
+    name:"Iron Knife", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:5},{item:"leather",qty:4},{item:"iron_ingot",qty:6},{item:"iron_nail",qty:2}]
+  },
+  iron_shovel: {
+    name:"Iron Shovel", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:4},{item:"iron_ingot",qty:6}]
+  },
+  iron_sickle: {
+    name:"Iron Sickle", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:4},{item:"leather",qty:4},{item:"iron_ingot",qty:10}]
+  },
+  iron_hammer: {
+    name:"Iron Hammer", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:4},{item:"leather",qty:4},{item:"iron_ingot",qty:10}]
+  },
+  iron_sledgehammer: {
+    name:"Iron Sledgehammer", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:10},{item:"iron_ingot",qty:15},{item:"rope",qty:8}]
+  },
+  iron_spear: {
+    name:"Iron Spear", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:5},{item:"leather",qty:6},{item:"iron_ingot",qty:24}]
+  },
+  iron_javelin: {
+    name:"Iron Javelin", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:5},{item:"leather",qty:5},{item:"iron_ingot",qty:20}]
+  },
+  iron_throwing_knife: {
+    name:"Iron Throwing Knife", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:4},{item:"leather",qty:4},{item:"iron_ingot",qty:5},{item:"iron_nail",qty:4}]
+  },
+  iron_shears: {
+    name:"Iron Shears", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:10},{item:"iron_ingot",qty:6},{item:"iron_nail",qty:2},{item:"fiber",qty:10}]
+  },
+  iron_bucket: {
+    name:"Iron Bucket", station:"Anvil Bench", output:1,
+    ingredients:[{item:"iron_ingot",qty:10},{item:"iron_nail",qty:2},{item:"rope",qty:5}]
+  },
+  watering_can: {
+    name:"Watering Can", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:4},{item:"iron_ingot",qty:5},{item:"iron_nail",qty:2}]
+  },
+  taxidermy_knife: {
+    name:"Taxidermy Knife", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:2},{item:"leather",qty:4},{item:"iron_ingot",qty:6},{item:"iron_nail",qty:2}]
+  },
+  wood_shield: {
+    name:"Wood Shield", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:15},{item:"leather",qty:5},{item:"iron_ingot",qty:3},{item:"fiber",qty:20}]
+  },
+  steel_heater_shield: {
+    name:"Steel Heater Shield", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:15},{item:"steel_ingot",qty:10}]
+  },
+  steel_axe: {
+    name:"Steel Axe", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:5},{item:"steel_ingot",qty:5},{item:"iron_nail",qty:2},{item:"epoxy",qty:4}]
+  },
+  steel_hammer: {
+    name:"Steel Hammer", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:5},{item:"steel_ingot",qty:6},{item:"iron_nail",qty:2},{item:"epoxy",qty:4}]
+  },
+  steel_pickaxe: {
+    name:"Steel Pickaxe", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:5},{item:"steel_ingot",qty:6},{item:"epoxy",qty:4}]
+  },
+  steel_knife: {
+    name:"Steel Knife", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:5},{item:"steel_ingot",qty:6},{item:"iron_nail",qty:2},{item:"epoxy",qty:4}]
+  },
+  steel_spear: {
+    name:"Steel Spear", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:5},{item:"steel_ingot",qty:24},{item:"epoxy",qty:6}]
+  },
+  steel_javelin: {
+    name:"Steel Javelin", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:5},{item:"steel_ingot",qty:20},{item:"epoxy",qty:4}]
+  },
+  steel_throwing_knife: {
+    name:"Steel Throwing Knife", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:4},{item:"steel_ingot",qty:6},{item:"iron_nail",qty:4},{item:"epoxy",qty:2}]
+  },
+  obsidian_axe: {
+    name:"Obsidian Axe", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:5},{item:"shaped_obsidian",qty:1},{item:"refined_wood",qty:5}]
+  },
+  obsidian_pickaxe: {
+    name:"Obsidian Pickaxe", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:4},{item:"shaped_obsidian",qty:6},{item:"refined_wood",qty:10}]
+  },
+  obsidian_knife: {
+    name:"Obsidian Knife", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:4},{item:"shaped_obsidian",qty:6},{item:"iron_nail",qty:2},{item:"refined_wood",qty:5}]
+  },
+  obsidian_sickle: {
+    name:"Obsidian Sickle", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:4},{item:"shaped_obsidian",qty:10},{item:"refined_wood",qty:5}]
+  },
+  obsidian_sledgehammer: {
+    name:"Obsidian Sledgehammer", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:5},{item:"shaped_obsidian",qty:15},{item:"iron_nail",qty:10},{item:"refined_wood",qty:20}]
+  },
+  obsidian_spear: {
+    name:"Obsidian Spear", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:6},{item:"shaped_obsidian",qty:15},{item:"refined_wood",qty:20}]
+  },
+  obsidian_javelin: {
+    name:"Obsidian Javelin", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:5},{item:"shaped_obsidian",qty:20},{item:"refined_wood",qty:20}]
+  },
+  obsidian_throwing_knife: {
+    name:"Obsidian Throwing Knife", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:4},{item:"shaped_obsidian",qty:5},{item:"iron_nail",qty:4},{item:"refined_wood",qty:5}]
+  },
+  rimetusk_shield: {
+    name:"Rimetusk Shield", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:3},{item:"epoxy",qty:5},{item:"frozen_wool",qty:4},{item:"ice_armor_fragment",qty:20}]
+  },
+  rimetusk_spear: {
+    name:"Rimetusk Spear", station:"Anvil Bench", output:1,
+    ingredients:[{item:"refined_wood",qty:2},{item:"frozen_wool",qty:1},{item:"ice_armor_fragment",qty:15}]
+  },
+  caveworm_knife: {
+    name:"Caveworm Knife", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:2},{item:"leather",qty:2},{item:"poison_sack",qty:5},{item:"worm_scale",qty:5}]
+  },
+  caveworm_spear: {
+    name:"Caveworm Spear", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:16},{item:"leather",qty:4},{item:"poison_sack",qty:10},{item:"worm_scale",qty:10}]
+  },
+  caveworm_javelin: {
+    name:"Caveworm Javelin", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:10},{item:"leather",qty:4},{item:"poison_sack",qty:10},{item:"worm_scale",qty:10}]
+  },
+  caveworm_throwing_knife: {
+    name:"Caveworm Throwing Knife", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:4},{item:"leather",qty:4},{item:"poison_sack",qty:4},{item:"worm_scale",qty:4}]
+  },
+  flint_arrow: {
+    name:"Flint Arrow", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:1},{item:"iron_ore",qty:1},{item:"stick",qty:5}]
+  },
+  iron_bolt: {
+    name:"Iron Bolt", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:1},{item:"iron_ingot",qty:2}]
+  },
+  steel_arrow: {
+    name:"Steel Arrow", station:"Anvil Bench", output:1,
+    ingredients:[{item:"steel_ingot",qty:1},{item:"epoxy",qty:1},{item:"stick",qty:5}]
+  },
+  steel_bolt: {
+    name:"Steel Bolt", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:1},{item:"steel_ingot",qty:1}]
+  },
+  copper_bolt: {
+    name:"Copper Bolt", station:"Anvil Bench", output:5,
+    ingredients:[{item:"wood",qty:1},{item:"copper_ingot",qty:1}]
+  },
+  obsidian_arrow: {
+    name:"Obsidian Arrow", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:5},{item:"shaped_obsidian",qty:1},{item:"refined_wood",qty:5}]
+  },
+  obsidian_bolt: {
+    name:"Obsidian Bolt", station:"Anvil Bench", output:1,
+    ingredients:[{item:"shaped_obsidian",qty:1},{item:"refined_wood",qty:5}]
+  },
+  caveworm_arrow: {
+    name:"Caveworm Arrow", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:5},{item:"poison_sack",qty:5},{item:"worm_scale",qty:2}]
+  },
+  caveworm_bow: {
+    name:"Caveworm Bow", station:"Anvil Bench", output:1,
+    ingredients:[{item:"leather",qty:25},{item:"poison_sack",qty:10},{item:"worm_scale",qty:15}]
+  },
+  longbow: {
+    name:"Longbow", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:24},{item:"leather",qty:32},{item:"bone",qty:4}]
+  },
+  crossbow: {
+    name:"Crossbow", station:"Anvil Bench", output:1,
+    ingredients:[{item:"wood",qty:18},{item:"leather",qty:12},{item:"iron_ingot",qty:12},{item:"iron_nail",qty:2}]
+  },
+  mining_cart: {
+    name:"Mining Cart", station:"Anvil Bench", output:1,
+    ingredients:[{item:"steel_ingot",qty:10},{item:"steel_rebar",qty:4},{item:"steel_screw",qty:10}]
+  },
+  milk_pail: {
+    name:"Milk Pail", station:"Anvil Bench", output:1,
+    ingredients:[{item:"steel_ingot",qty:10},{item:"steel_screw",qty:15}]
+  },
+
+  // ── MACHINING BENCH ──────────────────────────────────────────────────────
+  steel_screw: {
+    name:"Steel Screw", station:"Machining Bench", output:5,
+    ingredients:[{item:"steel_ingot",qty:1}]
+  },
+  steel_rebar: {
+    name:"Steel Rebar", station:"Machining Bench", output:5,
+    ingredients:[{item:"steel_ingot",qty:2}]
+  },
+  copper_wire: {
+    name:"Copper Wire", station:"Machining Bench", output:5,
+    ingredients:[{item:"copper_ingot",qty:1}]
+  },
+  gold_wire: {
+    name:"Gold Wire", station:"Machining Bench", output:5,
+    ingredients:[{item:"refined_gold",qty:1}]
+  },
+  electronics: {
+    name:"Electronics", station:"Machining Bench", output:1,
+    ingredients:[{item:"gold_wire",qty:6},{item:"copper_wire",qty:15},{item:"organic_resin",qty:2},{item:"epoxy",qty:2}]
+  },
+  fabricator: {
+    name:"Fabricator", station:"Machining Bench", output:1,
+    ingredients:[{item:"aluminum_ingot",qty:40},{item:"electronics",qty:30},{item:"concrete_mix",qty:30},{item:"carbon_fiber",qty:8},{item:"steel_screw",qty:30}]
+  },
+  concrete_furnace: {
+    name:"Concrete Furnace", station:"Machining Bench", output:1,
+    ingredients:[{item:"iron_ingot",qty:12},{item:"rope",qty:8},{item:"concrete_mix",qty:20},{item:"epoxy",qty:12}]
+  },
+  cement_mixer: {
+    name:"Cement Mixer", station:"Machining Bench", output:1,
+    ingredients:[{item:"iron_ingot",qty:20},{item:"refined_wood",qty:50},{item:"stone",qty:40},{item:"rope",qty:8},{item:"iron_nail",qty:8}]
+  },
+  biofuel_can: {
+    name:"Biofuel Can", station:"Machining Bench", output:1,
+    ingredients:[{item:"iron_ingot",qty:25}]
+  },
+  biofuel_composter: {
+    name:"Biofuel Composter", station:"Machining Bench", output:1,
+    ingredients:[{item:"iron_ingot",qty:20},{item:"copper_ingot",qty:8},{item:"concrete_mix",qty:12},{item:"steel_screw",qty:20}]
+  },
+  oxygen_tank: {
+    name:"Oxygen Tank", station:"Machining Bench", output:1,
+    ingredients:[{item:"steel_ingot",qty:20},{item:"epoxy",qty:4}]
+  },
+  kitchen_bench: {
+    name:"Kitchen Bench", station:"Machining Bench", output:1,
+    ingredients:[{item:"iron_ingot",qty:8},{item:"copper_nail",qty:20},{item:"epoxy",qty:20}]
+  },
+  canteen: {
+    name:"Canteen", station:"Machining Bench", output:1,
+    ingredients:[{item:"steel_ingot",qty:8},{item:"cured_leather",qty:1}]
+  },
+  wood_crop_plot: {
+    name:"Wood Crop Plot", station:"Machining Bench", output:1,
+    ingredients:[{item:"dirt",qty:20},{item:"sulfur",qty:10},{item:"wood",qty:8}]
+  },
+  biofuel_stove: {
+    name:"Biofuel Stove", station:"Machining Bench", output:1,
+    ingredients:[{item:"steel_ingot",qty:24},{item:"copper_nail",qty:4},{item:"refined_wood",qty:30},{item:"steel_screw",qty:8},{item:"epoxy",qty:20}]
+  },
+  biofuel_lamp: {
+    name:"Biofuel Lamp", station:"Machining Bench", output:1,
+    ingredients:[{item:"aluminum_ingot",qty:8},{item:"glass",qty:12},{item:"rope",qty:4},{item:"epoxy",qty:4}]
+  },
+  biofuel_water_pump: {
+    name:"Biofuel Water Pump", station:"Machining Bench", output:1,
+    ingredients:[{item:"steel_ingot",qty:16},{item:"copper_wire",qty:16},{item:"electronics",qty:4},{item:"epoxy",qty:12}]
+  },
+  dehumidifier: {
+    name:"Dehumidifier", station:"Machining Bench", output:1,
+    ingredients:[{item:"steel_ingot",qty:15},{item:"glass",qty:4},{item:"electronics",qty:20},{item:"copper_wire",qty:50},{item:"epoxy",qty:12}]
+  },
+  cave_scanner: {
+    name:"Cave Scanner", station:"Machining Bench", output:1,
+    ingredients:[{item:"iron_ingot",qty:10},{item:"copper_wire",qty:25},{item:"gold_wire",qty:25},{item:"iron_nail",qty:12}]
+  },
+  // GUNS
+  bolt_action_rifle: {
+    name:"Bolt Action Rifle", station:"Machining Bench", output:1,
+    ingredients:[{item:"steel_ingot",qty:40},{item:"cured_leather",qty:1},{item:"refined_wood",qty:12},{item:"steel_screw",qty:10},{item:"epoxy",qty:4}]
+  },
+  shotgun: {
+    name:"Shotgun", station:"Machining Bench", output:1,
+    ingredients:[{item:"steel_ingot",qty:26},{item:"cured_leather",qty:1},{item:"refined_wood",qty:12},{item:"steel_screw",qty:10},{item:"epoxy",qty:4}]
+  },
+  semi_auto_pistol: {
+    name:"Semi-Automatic Pistol", station:"Machining Bench", output:1,
+    ingredients:[{item:"steel_ingot",qty:20},{item:"cured_leather",qty:5},{item:"refined_wood",qty:6},{item:"steel_screw",qty:8},{item:"epoxy",qty:4}]
+  },
+  one_shot_pistol: {
+    name:"One-Shot Pistol", station:"Machining Bench", output:1,
+    ingredients:[{item:"iron_ingot",qty:20},{item:"copper_nail",qty:10},{item:"leather",qty:15},{item:"refined_wood",qty:6},{item:"tree_sap",qty:4}]
+  },
+  rusty_shotgun: {
+    name:"Rusty Shotgun", station:"Machining Bench", output:1,
+    ingredients:[{item:"steel_ingot",qty:10},{item:"leather",qty:10},{item:"wood",qty:15},{item:"tree_sap",qty:10}]
+  },
+  // AMMO
+  ammo_casing: {
+    name:"Ammo Casing", station:"Machining Bench", output:5,
+    ingredients:[{item:"iron_ingot",qty:1}]
+  },
+  round_9mm: {
+    name:"9mm Round", station:"Machining Bench", output:5,
+    ingredients:[{item:"ammo_casing",qty:5},{item:"gunpowder",qty:5}]
+  },
+  round_556: {
+    name:"5.56mm Round", station:"Machining Bench", output:10,
+    ingredients:[{item:"ammo_casing",qty:10},{item:"gunpowder",qty:15}]
+  },
+  round_762: {
+    name:"7.62mm Round", station:"Machining Bench", output:5,
+    ingredients:[{item:"ammo_casing",qty:5},{item:"gunpowder",qty:10}]
+  },
+  casing_12gauge: {
+    name:"12-Gauge Casing", station:"Machining Bench", output:5,
+    ingredients:[{item:"copper_ingot",qty:1},{item:"epoxy",qty:2}]
+  },
+  buckshot_12gauge: {
+    name:"12-Gauge Buckshot Shell", station:"Machining Bench", output:5,
+    ingredients:[{item:"casing_12gauge",qty:1},{item:"copper_nail",qty:2},{item:"gunpowder",qty:1},{item:"epoxy",qty:1}]
+  },
+
+  // ── CEMENT MIXER ─────────────────────────────────────────────────────────
+  concrete_mix: {
+    name:"Concrete Mix", station:"Cement Mixer", output:1,
+    ingredients:[{item:"tree_sap",qty:1},{item:"stone",qty:8},{item:"silica_ore",qty:4}]
+  },
+  concrete_wall: {
+    name:"Concrete Wall", station:"Cement Mixer", output:1,
+    ingredients:[{item:"concrete_mix",qty:4},{item:"steel_rebar",qty:10},{item:"steel_screw",qty:4}]
+  },
+  concrete_floor: {
+    name:"Concrete Floor", station:"Cement Mixer", output:1,
+    ingredients:[{item:"concrete_mix",qty:4},{item:"steel_rebar",qty:10},{item:"steel_screw",qty:4}]
+  },
+  concrete_frame: {
+    name:"Concrete Frame", station:"Cement Mixer", output:1,
+    ingredients:[{item:"concrete_mix",qty:8},{item:"steel_rebar",qty:20},{item:"steel_screw",qty:10}]
+  },
+  concrete_beam: {
+    name:"Concrete Beam", station:"Cement Mixer", output:1,
+    ingredients:[{item:"concrete_mix",qty:2},{item:"steel_rebar",qty:8},{item:"steel_screw",qty:2}]
+  },
+  concrete_ramp: {
+    name:"Concrete Ramp/Stairs", station:"Cement Mixer", output:1,
+    ingredients:[{item:"concrete_mix",qty:4},{item:"steel_rebar",qty:12},{item:"steel_screw",qty:4}]
+  },
+  concrete_wall_angled: {
+    name:"Concrete Wall (Angled)", station:"Cement Mixer", output:1,
+    ingredients:[{item:"concrete_mix",qty:2},{item:"steel_rebar",qty:5},{item:"steel_screw",qty:2}]
+  },
+  heavy_trapdoor: {
+    name:"Heavy Trapdoor", station:"Cement Mixer", output:1,
+    ingredients:[{item:"steel_screw",qty:4},{item:"epoxy",qty:4},{item:"iron_ingot",qty:12}]
+  },
+  concrete_door: {
+    name:"Concrete Door", station:"Machining Bench", output:1,
+    ingredients:[{item:"platinum_ingot",qty:2},{item:"steel_ingot",qty:6},{item:"steel_screw",qty:4}]
+  },
+
+  // ── TEXTILES BENCH — ARMOR ───────────────────────────────────────────────
+  leather_chest_armor: {
+    name:"Leather Chest Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:60},{item:"leather",qty:24}]
+  },
+  leather_head_armor: {
+    name:"Leather Head Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:40},{item:"leather",qty:12}]
+  },
+  leather_leg_armor: {
+    name:"Leather Leg Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:60},{item:"leather",qty:18}]
+  },
+  leather_arms_armor: {
+    name:"Leather Arms Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:40},{item:"leather",qty:8}]
+  },
+  leather_feet_armor: {
+    name:"Leather Feet Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:20},{item:"leather",qty:12}]
+  },
+  fur_chest_armor: {
+    name:"Fur Chest Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fur",qty:24},{item:"leather",qty:8},{item:"rope",qty:4}]
+  },
+  fur_head_armor: {
+    name:"Fur Head Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fur",qty:12},{item:"leather",qty:4},{item:"rope",qty:2}]
+  },
+  fur_leg_armor: {
+    name:"Fur Leg Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fur",qty:18},{item:"leather",qty:8},{item:"rope",qty:3}]
+  },
+  fur_arms_armor: {
+    name:"Fur Arms Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fur",qty:8},{item:"leather",qty:4},{item:"rope",qty:1}]
+  },
+  fur_feet_armor: {
+    name:"Fur Feet Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fur",qty:12},{item:"leather",qty:6},{item:"rope",qty:2}]
+  },
+  ghillie_chest_armor: {
+    name:"Ghillie Chest Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:160},{item:"rope",qty:4},{item:"stick",qty:8}]
+  },
+  ghillie_head_armor: {
+    name:"Ghillie Head Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:120},{item:"rope",qty:2},{item:"stick",qty:2}]
+  },
+  ghillie_leg_armor: {
+    name:"Ghillie Leg Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:160},{item:"rope",qty:3},{item:"stick",qty:8}]
+  },
+  ghillie_arms_armor: {
+    name:"Ghillie Arms Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:120},{item:"rope",qty:1},{item:"stick",qty:4}]
+  },
+  ghillie_feet_armor: {
+    name:"Ghillie Feet Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:80},{item:"rope",qty:2},{item:"stick",qty:6}]
+  },
+  brown_bear_chest_armor: {
+    name:"Brown Bear Chest Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fur",qty:20},{item:"leather",qty:5},{item:"rope",qty:6}]
+  },
+  brown_bear_head_armor: {
+    name:"Brown Bear Head Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fur",qty:10},{item:"leather",qty:3},{item:"rope",qty:4},{item:"brown_bear_vestige",qty:1}]
+  },
+  brown_bear_leg_armor: {
+    name:"Brown Bear Leg Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fur",qty:16},{item:"leather",qty:4},{item:"rope",qty:6}]
+  },
+  brown_bear_arm_armor: {
+    name:"Brown Bear Arm Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fur",qty:15},{item:"leather",qty:3},{item:"rope",qty:2}]
+  },
+  brown_bear_feet_armor: {
+    name:"Brown Bear Feet Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fur",qty:15},{item:"leather",qty:3},{item:"rope",qty:2}]
+  },
+  black_wolf_chest_armor: {
+    name:"Black Wolf Chest Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"black_wolf_fur",qty:20},{item:"leather",qty:5},{item:"rope",qty:6},{item:"black_wolf_tooth",qty:4}]
+  },
+  black_wolf_head_armor: {
+    name:"Black Wolf Head Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"black_wolf_fur",qty:10},{item:"leather",qty:3},{item:"rope",qty:4},{item:"black_wolf_tooth",qty:4},{item:"black_wolf_vestige",qty:1}]
+  },
+  black_wolf_legs_armor: {
+    name:"Black Wolf Legs Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"black_wolf_fur",qty:16},{item:"leather",qty:4},{item:"rope",qty:6},{item:"black_wolf_tooth",qty:4}]
+  },
+  black_wolf_arm_armor: {
+    name:"Black Wolf Arm Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"black_wolf_fur",qty:15},{item:"leather",qty:3},{item:"rope",qty:2},{item:"black_wolf_tooth",qty:4}]
+  },
+  black_wolf_feet_armor: {
+    name:"Black Wolf Feet Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"black_wolf_fur",qty:15},{item:"leather",qty:3},{item:"rope",qty:2},{item:"black_wolf_tooth",qty:6}]
+  },
+  caveworm_chest_armor: {
+    name:"Caveworm Chest Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:40},{item:"leather",qty:12},{item:"bone",qty:25},{item:"worm_scale",qty:28}]
+  },
+  caveworm_head_armor: {
+    name:"Caveworm Head Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:20},{item:"leather",qty:10},{item:"bone",qty:5},{item:"worm_scale",qty:12}]
+  },
+  caveworm_leg_armor: {
+    name:"Caveworm Leg Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:30},{item:"leather",qty:9},{item:"bone",qty:15},{item:"worm_scale",qty:14}]
+  },
+  caveworm_arms_armor: {
+    name:"Caveworm Arms Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:20},{item:"leather",qty:4},{item:"bone",qty:5},{item:"worm_scale",qty:8}]
+  },
+  caveworm_feet_armor: {
+    name:"Caveworm Feet Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:20},{item:"leather",qty:6},{item:"bone",qty:5},{item:"worm_scale",qty:8}]
+  },
+  heavy_obsidian_chest_armor: {
+    name:"Heavy Obsidian Chest Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"leather",qty:2},{item:"rope",qty:2},{item:"obsidian",qty:2}]
+  },
+  heavy_obsidian_head_armor: {
+    name:"Heavy Obsidian Head Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"leather",qty:4},{item:"rope",qty:4},{item:"obsidian",qty:3}]
+  },
+  heavy_obsidian_leg_armor: {
+    name:"Heavy Obsidian Leg Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"leather",qty:2},{item:"rope",qty:2},{item:"obsidian",qty:2}]
+  },
+  heavy_obsidian_arm_armor: {
+    name:"Heavy Obsidian Arm Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"leather",qty:2},{item:"rope",qty:2},{item:"obsidian",qty:2}]
+  },
+  heavy_obsidian_feet_armor: {
+    name:"Heavy Obsidian Feet Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"leather",qty:2},{item:"rope",qty:4},{item:"obsidian",qty:1}]
+  },
+  // TEXTILES — OTHER
+  leather_backpack: {
+    name:"Leather Backpack", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:10},{item:"leather",qty:20},{item:"rope",qty:8}]
+  },
+  farmers_satchel: {
+    name:"Farmer's Satchel", station:"Textiles Bench", output:1,
+    ingredients:[{item:"iron_nail",qty:7},{item:"leather",qty:30},{item:"rope",qty:8}]
+  },
+  medical_satchel: {
+    name:"Medical Satchel", station:"Textiles Bench", output:1,
+    ingredients:[{item:"iron_nail",qty:5},{item:"leather",qty:20},{item:"rope",qty:12}]
+  },
+  small_pouch: {
+    name:"Small Pouch", station:"Textiles Bench", output:1,
+    ingredients:[{item:"iron_nail",qty:5},{item:"leather",qty:20},{item:"rope",qty:5}]
+  },
+  arctic_pelt: {
+    name:"Arctic Pelt", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:30},{item:"wool",qty:20}]
+  },
+  fur_curtain_door: {
+    name:"Fur Curtain Door", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:15},{item:"fur",qty:15},{item:"wood",qty:5}]
+  },
+  fur_curtain_window: {
+    name:"Fur Curtain Window", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:10},{item:"fur",qty:20},{item:"wood",qty:5}]
+  },
+  leather_curtain_door: {
+    name:"Leather Curtain Door", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:20},{item:"leather",qty:15},{item:"wood",qty:5}]
+  },
+  thick_woven_rug: {
+    name:"Thick Woven Rug", station:"Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:100},{item:"leather",qty:10}]
+  },
+
+  // ── HERBALISM BENCH ──────────────────────────────────────────────────────
+  antibiotic: {
+    name:"Antibiotic", station:"Herbalism Bench", output:1,
+    ingredients:[{item:"charcoal",qty:3},{item:"honeycomb",qty:3}]
+  },
+  antibiotic_tonic: {
+    name:"Antibiotic Tonic", station:"Herbalism Bench", output:1,
+    ingredients:[{item:"charcoal",qty:3},{item:"yeast",qty:1},{item:"epoxy",qty:1}]
+  },
+  anti_poison: {
+    name:"Anti-Poison", station:"Herbalism Bench", output:1,
+    ingredients:[{item:"charcoal",qty:3},{item:"fiber",qty:1},{item:"poison_paste",qty:1}]
+  },
+  anti_parasitic: {
+    name:"Anti-Parasitic", station:"Herbalism Bench", output:1,
+    ingredients:[{item:"charcoal",qty:3},{item:"organic_resin",qty:1},{item:"reed",qty:1}]
+  },
+  blood_thinning: {
+    name:"Blood Thinning Tonic", station:"Herbalism Bench", output:1,
+    ingredients:[{item:"charcoal",qty:3},{item:"tree_sap",qty:1},{item:"lily",qty:1}]
+  },
+  health_recovery_tonic: {
+    name:"Health Recovery Tonic", station:"Herbalism Bench", output:1,
+    ingredients:[{item:"tree_sap",qty:1},{item:"yeast",qty:1},{item:"lily",qty:3},{item:"flour",qty:1}]
+  },
+  health_recovery_concentrate: {
+    name:"Health Recovery Concentrate", station:"Herbalism Bench", output:1,
+    ingredients:[{item:"bone",qty:3},{item:"oxite",qty:3},{item:"salt",qty:2}]
+  },
+  stamina_tonic: {
+    name:"Stamina Enhancement Tonic", station:"Herbalism Bench", output:1,
+    ingredients:[{item:"organic_resin",qty:1},{item:"tree_sap",qty:1},{item:"yeast",qty:2},{item:"reed",qty:3}]
+  },
+  strength_tonic: {
+    name:"Strength Enhancement Tonic", station:"Herbalism Bench", output:1,
+    ingredients:[{item:"organic_resin",qty:2},{item:"tree_sap",qty:1},{item:"lily",qty:2},{item:"crushed_bone",qty:2},{item:"wheat",qty:2}]
+  },
+  progenitive_fertilizer: {
+    name:"Progenitive Fertilizer", station:"Herbalism Bench", output:1,
+    ingredients:[{item:"basic_fertilizer",qty:1},{item:"volatile_substance",qty:1}]
+  },
+  recovery_fertilizer: {
+    name:"Recovery Fertilizer", station:"Herbalism Bench", output:1,
+    ingredients:[{item:"basic_fertilizer",qty:1},{item:"crushed_bone",qty:3}]
+  },
+  flatbread_dough: {
+    name:"Flatbread Dough", station:"Herbalism Bench", output:1,
+    ingredients:[{item:"flour",qty:3},{item:"water",qty:1}]
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════════════
+let session = [];
+let selectedItem = null;
+
+try { session = JSON.parse(localStorage.getItem('icarus-session') || '[]'); } catch(e) { session = []; }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  CALCULATOR
+// ═══════════════════════════════════════════════════════════════════════════
+function calculateSession() {
+  const sessionKeys = new Set(session.map(s => s.key));
+  const raw = {};
+  const intermediate = {};
+  const stationMap = {}; // station → {key → {name, qty, isTarget}}
+
+  function expand(key, needed) {
+    const item = ITEMS[key];
+    if (!item) { raw[key] = (raw[key]||0) + needed; return; }
+    if (item.raw) { raw[key] = (raw[key]||0) + needed; return; }
+
+    const crafts = Math.ceil(needed / item.output);
+    const produced = crafts * item.output;
+
+    if (!sessionKeys.has(key)) {
+      intermediate[key] = (intermediate[key]||0) + produced;
+    }
+
+    if (!stationMap[item.station]) stationMap[item.station] = {};
+    if (!stationMap[item.station][key]) {
+      stationMap[item.station][key] = { name:item.name, qty:0, isTarget:sessionKeys.has(key) };
+    }
+    stationMap[item.station][key].qty += produced;
+
+    for (const ing of item.ingredients) {
+      expand(ing.item, ing.qty * crafts);
+    }
+  }
+
+  for (const { key, qty } of session) {
+    expand(key, qty);
+  }
+
+  return { raw, intermediate, stationMap };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  SEARCH
+// ═══════════════════════════════════════════════════════════════════════════
+const craftableItems = Object.entries(ITEMS)
+  .filter(([,v]) => !v.raw)
+  .map(([k,v]) => ({ key:k, name:v.name, station:v.station }))
+  .sort((a,b) => a.name.localeCompare(b.name));
+
+function searchItems(query) {
+  if (!query.trim()) return [];
+  const q = query.toLowerCase();
+  return craftableItems.filter(i => i.name.toLowerCase().includes(q)).slice(0, 12);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════════════════════
+function saveSession() {
+  localStorage.setItem('icarus-session', JSON.stringify(session));
+}
+
+function renderSession() {
+  const el = document.getElementById('session-list');
+  if (session.length === 0) {
+    el.innerHTML = '<div class="session-empty">No items added yet — search above to begin</div>';
+    document.getElementById('results').classList.remove('visible');
+    return;
+  }
+  el.innerHTML = session.map((s,i) => {
+    const item = ITEMS[s.key];
+    return `<div class="session-item">
+      <div style="flex:1">
+        <div class="session-item-name">${item.name}</div>
+        <div class="session-item-station">${item.station}</div>
+      </div>
+      <div class="session-item-qty">×${s.qty}</div>
+      <div class="session-item-btns">
+        <button class="edit-qty-btn" onclick="editQty(${i})" title="Change quantity">✎</button>
+        <button class="remove-btn" onclick="removeItem(${i})" title="Remove">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+  renderResults();
+}
+
+function renderResults() {
+  const { raw, intermediate, stationMap } = calculateSession();
+  document.getElementById('results').classList.add('visible');
+
+  // GATHER
+  const gatherEl = document.getElementById('gather-list');
+  const rawEntries = Object.entries(raw).sort((a,b) => b[1]-a[1]);
+  document.getElementById('gather-count').textContent = rawEntries.length + ' items';
+  gatherEl.innerHTML = rawEntries.map(([k,qty]) => {
+    const name = ITEMS[k] ? ITEMS[k].name : k.replace(/_/g,' ');
+    return `<div class="mat-row">
+      <div><div class="mat-name gather">${name}</div></div>
+      <div class="mat-qty gather">${qty.toLocaleString()}</div>
+    </div>`;
+  }).join('') || '<div style="padding:14px;font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--dim)">No raw materials needed</div>';
+
+  // CRAFT (intermediates)
+  const craftEl = document.getElementById('craft-list');
+  const craftEntries = Object.entries(intermediate).sort((a,b) => b[1]-a[1]);
+  document.getElementById('craft-count').textContent = craftEntries.length + ' items';
+  craftEl.innerHTML = craftEntries.map(([k,qty]) => {
+    const item = ITEMS[k];
+    const name = item ? item.name : k.replace(/_/g,' ');
+    const station = item ? item.station : '?';
+    return `<div class="mat-row">
+      <div>
+        <div class="mat-name craft">${name}</div>
+        <div class="mat-note">${station}</div>
+      </div>
+      <div class="mat-qty craft">${qty.toLocaleString()}</div>
+    </div>`;
+  }).join('') || '<div style="padding:14px;font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--dim)">No intermediate crafts needed</div>';
+
+  // STATION STEPS
+  const stepsEl = document.getElementById('steps-section');
+  // Order stations logically
+  const stationOrder = ['Character','Crafting Bench','Mortar & Pestle','Stone Furnace','Furnace','Concrete Furnace','Anvil Bench','Machining Bench','Textiles Bench','Herbalism Bench','Decoration Bench','Cement Mixer','Carpentry Bench','Kitchen Bench','Fabricator'];
+  const stations = Object.keys(stationMap).sort((a,b) => {
+    const ai = stationOrder.indexOf(a), bi = stationOrder.indexOf(b);
+    if (ai === -1 && bi === -1) return a.localeCompare(b);
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+
+  stepsEl.innerHTML = stations.map(station => {
+    const items = stationMap[station];
+    const rows = Object.entries(items).map(([k,{name,qty,isTarget}]) => {
+      const item = ITEMS[k];
+      const detail = item && !item.raw
+        ? item.ingredients.map(ing => {
+            const ingItem = ITEMS[ing.item];
+            const ingName = ingItem ? ingItem.name : ing.item.replace(/_/g,' ');
+            const crafts = Math.ceil(qty / (item.output||1));
+            return `${ingName} ×${ing.qty * crafts}`;
+          }).join(', ')
+        : '';
+      return `<div class="step-row${isTarget?' target':''}">
+        <div>
+          <div class="step-item${isTarget?' target-item':''}">${name}</div>
+          ${detail ? `<div class="step-detail">${detail}</div>` : ''}
+        </div>
+        <div class="step-qty">${qty.toLocaleString()}</div>
+      </div>`;
+    }).join('');
+
+    return `<div class="station-block">
+      <div class="station-head" onclick="toggleStation(this)">
+        <div class="station-name"><span class="station-dot"></span>${station}</div>
+        <div class="station-toggle">▾</div>
+      </div>
+      <div class="station-body">${rows}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  EVENT HANDLERS
+// ═══════════════════════════════════════════════════════════════════════════
+function toggleStation(head) {
+  const body = head.nextElementSibling;
+  const tog = head.querySelector('.station-toggle');
+  const collapsed = body.style.display === 'none';
+  body.style.display = collapsed ? '' : 'none';
+  tog.textContent = collapsed ? '▾' : '▸';
+}
+
+function removeItem(i) {
+  session.splice(i, 1);
+  saveSession();
+  renderSession();
+}
+
+function editQty(i) {
+  const newQty = parseInt(prompt(`New quantity for ${ITEMS[session[i].key].name}:`, session[i].qty));
+  if (newQty > 0) {
+    session[i].qty = newQty;
+    saveSession();
+    renderSession();
+  }
+}
+
+// Search input
+const searchEl = document.getElementById('item-search');
+const dropEl = document.getElementById('dropdown');
+const addBtn = document.getElementById('add-btn');
+let activeIdx = -1;
+
+searchEl.addEventListener('input', () => {
+  selectedItem = null;
+  addBtn.disabled = true;
+  const results = searchItems(searchEl.value);
+  activeIdx = -1;
+  if (results.length === 0) { dropEl.classList.remove('open'); dropEl.innerHTML = ''; return; }
+  dropEl.innerHTML = results.map((r,i) =>
+    `<div class="dd-item" data-key="${r.key}" data-idx="${i}">
+      ${r.name}<span class="dd-station">${r.station}</span>
+    </div>`
+  ).join('');
+  dropEl.classList.add('open');
+  dropEl.querySelectorAll('.dd-item').forEach(el => {
+    el.addEventListener('mousedown', e => {
+      e.preventDefault();
+      selectItem(el.dataset.key, el.textContent.trim().replace(el.querySelector('.dd-station').textContent.trim(),'').trim());
+    });
+  });
+});
+
+searchEl.addEventListener('keydown', e => {
+  const items = dropEl.querySelectorAll('.dd-item');
+  if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx+1, items.length-1); updateActive(items); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx-1, 0); updateActive(items); }
+  else if (e.key === 'Enter') {
+    if (activeIdx >= 0 && items[activeIdx]) {
+      const el = items[activeIdx];
+      selectItem(el.dataset.key, el.textContent.trim().replace(el.querySelector('.dd-station').textContent.trim(),'').trim());
+    } else if (selectedItem) {
+      addToSession();
+    }
+  }
+  else if (e.key === 'Escape') { dropEl.classList.remove('open'); }
+});
+
+function updateActive(items) {
+  items.forEach((el,i) => el.classList.toggle('active', i === activeIdx));
+  if (items[activeIdx]) items[activeIdx].scrollIntoView({block:'nearest'});
+}
+
+function selectItem(key, name) {
+  selectedItem = key;
+  searchEl.value = ITEMS[key].name;
+  dropEl.classList.remove('open');
+  addBtn.disabled = false;
+  document.getElementById('qty-input').focus();
+}
+
+document.addEventListener('click', e => {
+  if (!searchEl.contains(e.target) && !dropEl.contains(e.target)) {
+    dropEl.classList.remove('open');
+  }
+});
+
+// Qty stepper
+document.getElementById('qty-up').addEventListener('click', () => {
+  const el = document.getElementById('qty-input');
+  el.value = Math.min(9999, parseInt(el.value||1) + 1);
+});
+document.getElementById('qty-down').addEventListener('click', () => {
+  const el = document.getElementById('qty-input');
+  el.value = Math.max(1, parseInt(el.value||1) - 1);
+});
+
+// Add button
+addBtn.addEventListener('click', addToSession);
+
+function addToSession() {
+  if (!selectedItem) return;
+  const qty = Math.max(1, parseInt(document.getElementById('qty-input').value) || 1);
+  const existing = session.find(s => s.key === selectedItem);
+  if (existing) {
+    existing.qty += qty;
+  } else {
+    session.push({ key: selectedItem, qty });
+  }
+  saveSession();
+  renderSession();
+  searchEl.value = '';
+  document.getElementById('qty-input').value = 1;
+  selectedItem = null;
+  addBtn.disabled = true;
+  searchEl.focus();
+}
+
+// Clear
+document.getElementById('clear-btn').addEventListener('click', () => {
+  if (session.length === 0 || confirm('Clear all session items?')) {
+    session = [];
+    saveSession();
+    renderSession();
+  }
+});
+
+// Init
+renderSession();
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════════════════
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  BASE PLANNER DATA
+// ═══════════════════════════════════════════════════════════════════════════
+const BUILDING_TIERS = {
+  thatch: {
+    name:"Thatch",
+    wall:"thatch_wall", floor:"thatch_floor",
+    roof_flat:"thatch_roof", roof_pitched:"thatch_roof",
+    door:"thatch_door"
+  },
+  wood: {
+    name:"Wood",
+    wall:"wood_wall", floor:"wood_floor",
+    roof_flat:"wood_floor", roof_pitched:"wood_roof",
+    door:"wood_door"
+  },
+  stone: {
+    name:"Stone",
+    wall:"stone_wall", floor:"stone_floor",
+    roof_flat:"stone_floor", roof_pitched:"stone_roof",
+    door:"stone_door"
+  },
+  concrete: {
+    name:"Concrete",
+    wall:"concrete_wall", floor:"concrete_floor",
+    roof_flat:"concrete_floor", roof_pitched:"steel_roofing",
+    door:"concrete_door"
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  BASE PLANNER — PURE EXPAND (no closures, reusable)
+// ═══════════════════════════════════════════════════════════════════════════
+function expandRaw(key, needed, rawOut, intermediateOut, stationOut) {
+  const item = ITEMS[key];
+  if (!item || item.raw) { rawOut[key] = (rawOut[key]||0) + needed; return; }
+
+  const crafts = Math.ceil(needed / item.output);
+  const produced = crafts * item.output;
+
+  intermediateOut[key] = (intermediateOut[key]||0) + produced;
+
+  if (!stationOut[item.station]) stationOut[item.station] = {};
+  if (!stationOut[item.station][key]) stationOut[item.station][key] = { name:item.name, qty:0 };
+  stationOut[item.station][key].qty += produced;
+
+  for (const ing of item.ingredients) {
+    expandRaw(ing.item, ing.qty * crafts, rawOut, intermediateOut, stationOut);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  BASE PLANNER — TOGGLE RIDGE DIR
+// ═══════════════════════════════════════════════════════════════════════════
+function toggleRidgeDir() {
+  const roofType = document.getElementById('bp-roof').value;
+  document.getElementById('bp-ridge-wrap').style.display = roofType === 'pitched' ? '' : 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  BASE PLANNER — CALCULATE
+// ═══════════════════════════════════════════════════════════════════════════
+function calculateBase() {
+  const tierKey  = document.getElementById('bp-tier').value;
+  const w        = Math.max(1, parseInt(document.getElementById('bp-w').value) || 4);
+  const l        = Math.max(1, parseInt(document.getElementById('bp-l').value) || 6);
+  const h        = Math.max(1, parseInt(document.getElementById('bp-h').value) || 1);
+  const roofType = document.getElementById('bp-roof').value;
+  const ridgeDir = document.getElementById('bp-ridge').value;
+  const doors    = Math.max(0, parseInt(document.getElementById('bp-doors').value) || 0);
+
+  const tier = BUILDING_TIERS[tierKey];
+
+  // ── Piece counts ──────────────────────────────────────────
+  const floorCount = w * l * h;
+  const totalWalls  = 2 * h * (w + l);
+  const wallCount   = Math.max(0, totalWalls - doors);
+  const doorCount   = Math.min(doors, totalWalls);
+  const roofPiece   = roofType === 'flat' ? tier.roof_flat : tier.roof_pitched;
+  const roofCount   = w * l;
+
+  // Gable ends (pitched only) — triangular peak sections
+  let gableCount = 0;
+  let gableLabel = '';
+  if (roofType === 'pitched') {
+    if (ridgeDir === 'length') {
+      gableCount = w; // triangular tops on the 2 short ends, ~W/2 pieces each × 2
+      gableLabel = `Gable ends (2 × ${Math.ceil(w/2)} ≈ ${w} wall pieces)`;
+    } else {
+      gableCount = l;
+      gableLabel = `Gable ends (2 × ${Math.ceil(l/2)} ≈ ${l} wall pieces)`;
+    }
+  }
+
+  // ── Piece summary ─────────────────────────────────────────
+  const pieces = [
+    { label:'Floors',              pieceKey:tier.floor,   qty:floorCount,  color:'var(--steel)' },
+    { label:'Walls',               pieceKey:tier.wall,    qty:wallCount,   color:'var(--green)' },
+    { label:'Doors',               pieceKey:tier.door,    qty:doorCount,   color:'var(--amber)' },
+    { label:roofType==='flat'?'Roof (Flat)':'Roof Slopes', pieceKey:roofPiece, qty:roofCount, color:'var(--green)' },
+  ];
+  if (gableCount > 0) {
+    pieces.push({ label:'Gable Ends (~)', pieceKey:tier.wall, qty:gableCount, color:'var(--dim)', note:gableLabel });
+  }
+
+  // ── Expand to raw materials ───────────────────────────────
+  const raw = {}, intermediate = {}, stationMap = {};
+  for (const p of pieces) {
+    if (p.qty > 0) expandRaw(p.pieceKey, p.qty, raw, intermediate, stationMap);
+  }
+
+  // ── Render summary ────────────────────────────────────────
+  const summaryGrid = document.getElementById('bp-summary-grid');
+  summaryGrid.innerHTML = pieces.filter(p => p.qty > 0).map(p => {
+    const item = ITEMS[p.pieceKey];
+    return `<div class="bp-stat">
+      <div class="bp-stat-label">${p.label}</div>
+      <div class="bp-stat-value" style="color:${p.color}">${p.qty.toLocaleString()}</div>
+      <div class="bp-stat-sub">${item ? item.name : p.pieceKey} @ ${item ? item.station : '?'}</div>
+      ${p.note ? `<div class="bp-stat-sub" style="color:var(--amber2)">${p.note}</div>` : ''}
+    </div>`;
+  }).join('') +
+  `<div class="bp-stat">
+    <div class="bp-stat-label">Footprint</div>
+    <div class="bp-stat-value" style="color:var(--dim)">${w}×${l}</div>
+    <div class="bp-stat-sub">${w*l} tiles · ${h} stor${h===1?'y':'ies'}</div>
+  </div>`;
+
+  // Show/hide gable note
+  document.getElementById('bp-gable-note').style.display = gableCount > 0 ? '' : 'none';
+
+  // ── Render gather list ────────────────────────────────────
+  const rawEntries = Object.entries(raw).sort((a,b) => b[1]-a[1]);
+  document.getElementById('bp-gather-count').textContent = rawEntries.length + ' items';
+  document.getElementById('bp-gather-list').innerHTML = rawEntries.map(([k,qty]) => {
+    const name = ITEMS[k] ? ITEMS[k].name : k.replace(/_/g,' ');
+    return `<div class="mat-row">
+      <div class="mat-name gather">${name}</div>
+      <div class="mat-qty gather">${qty.toLocaleString()}</div>
+    </div>`;
+  }).join('') || '<div style="padding:14px;font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--dim)">None</div>';
+
+  // ── Render intermediate crafts ────────────────────────────
+  const craftEntries = Object.entries(intermediate).sort((a,b) => b[1]-a[1]);
+  document.getElementById('bp-craft-count').textContent = craftEntries.length + ' items';
+  document.getElementById('bp-craft-list').innerHTML = craftEntries.map(([k,qty]) => {
+    const item = ITEMS[k];
+    return `<div class="mat-row">
+      <div>
+        <div class="mat-name craft">${item ? item.name : k}</div>
+        <div class="mat-note">${item ? item.station : '?'}</div>
+      </div>
+      <div class="mat-qty craft">${qty.toLocaleString()}</div>
+    </div>`;
+  }).join('') || '<div style="padding:14px;font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--dim)">None</div>';
+
+  // ── Render station steps ──────────────────────────────────
+  const stationOrder = ['Character','Crafting Bench','Masonry Bench','Mortar & Pestle','Furnace','Concrete Furnace','Anvil Bench','Machining Bench','Cement Mixer'];
+  const stations = Object.keys(stationMap).sort((a,b) => {
+    const ai = stationOrder.indexOf(a), bi = stationOrder.indexOf(b);
+    if (ai===-1 && bi===-1) return a.localeCompare(b);
+    if (ai===-1) return 1; if (bi===-1) return -1;
+    return ai - bi;
+  });
+
+  document.getElementById('bp-steps-section').innerHTML = stations.map(station => {
+    const items = stationMap[station];
+    const rows = Object.entries(items).map(([k,{name,qty}]) => {
+      const item = ITEMS[k];
+      const detail = item && item.ingredients
+        ? item.ingredients.map(ing => {
+            const ingItem = ITEMS[ing.item];
+            const ingName = ingItem ? ingItem.name : ing.item.replace(/_/g,' ');
+            const crafts = Math.ceil(qty / (item.output||1));
+            return `${ingName} ×${(ing.qty * crafts).toLocaleString()}`;
+          }).join(', ')
+        : '';
+      return `<div class="step-row">
+        <div>
+          <div class="step-item">${name}</div>
+          ${detail ? `<div class="step-detail">${detail}</div>` : ''}
+        </div>
+        <div class="step-qty">${qty.toLocaleString()}</div>
+      </div>`;
+    }).join('');
+    return `<div class="station-block">
+      <div class="station-head" onclick="toggleStation(this)">
+        <div class="station-name"><span class="station-dot"></span>${station}</div>
+        <div class="station-toggle">▾</div>
+      </div>
+      <div class="station-body">${rows}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('bp-results').classList.add('visible');
+}
+</script>
+</body>
+</html>
