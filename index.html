@@ -481,7 +481,6 @@ const ITEMS = {
   fur:            { name:"Fur",            raw:true },
   wool:           { name:"Wool",           raw:true },
   bone:           { name:"Bone",           raw:true },
-  charcoal:       { name:"Charcoal",       raw:true },
   tree_sap:       { name:"Tree Sap",       raw:true },
   oxite:          { name:"Oxite",          raw:true },
   sulfur:         { name:"Sulfur",         raw:true },
@@ -525,11 +524,30 @@ const ITEMS = {
   super_cooled_ice:   { name:"Super Cooled Ice",    raw:true },
   ammonia:            { name:"Ammonia",             raw:true },
   basic_fertilizer:   { name:"Basic Fertilizer",   raw:true },
-  // Refined Wood: made at Carpentry Bench but recipe TBC; mark raw for now
-  refined_wood:       { name:"Refined Wood",        raw:true },
-  // Cured Leather: Salting Station, but recipe TBC
-  cured_leather:      { name:"Cured Leather",       raw:true },
   paint:              { name:"Paint",               raw:true },
+  raw_meat:           { name:"Raw Meat",            raw:true },
+  raw_giant_steak:    { name:"Raw Giant Steak",     raw:true },
+  raw_fish:           { name:"Raw Fish",            raw:true },
+  egg:                { name:"Egg",                 raw:true },
+  corn:               { name:"Corn",               raw:true },
+  potato:             { name:"Potato",             raw:true },
+  pumpkin:            { name:"Pumpkin",            raw:true },
+  mushroom:           { name:"Mushroom",           raw:true },
+  tomato:             { name:"Tomato",             raw:true },
+  carrot:             { name:"Carrot",             raw:true },
+  soy_bean:           { name:"Soy Bean",           raw:true },
+  rhubarb:            { name:"Rhubarb",            raw:true },
+  kumara:             { name:"Kumara",             raw:true },
+  avocado:            { name:"Avocado",            raw:true },
+  cocoa_seed:         { name:"Cocoa Seed",         raw:true },
+  tea_leaf:           { name:"Tea Leaf",           raw:true },
+  liquid_container:   { name:"Liquid Container",   raw:true },
+  water_container:    { name:"Water Container",    raw:true },
+  sandworm_scale:     { name:"Sandworm Scale",     raw:true },
+  polar_bear_vestige: { name:"Polar Bear Vestige", raw:true },
+  hammerhead_slime:   { name:"Hammerhead Slime",   raw:true },
+  biofuel:            { name:"Biofuel",            raw:true },
+  petroleum:          { name:"Petroleum",          raw:true },
 
   // ── STONE FURNACE / CONCRETE FURNACE ───────────────────────────────────
   iron_ingot: {
@@ -698,7 +716,7 @@ const ITEMS = {
   },
   carpentry_bench: {
     name:"Carpentry Bench", station:"Crafting Bench", output:1,
-    ingredients:[{item:"wood",qty:80},{item:"copper_nail",qty:120}]
+    ingredients:[{item:"wood",qty:80},{item:"rope",qty:12},{item:"copper_nail",qty:120}]
   },
   masonry_bench: {
     name:"Masonry Bench", station:"Crafting Bench", output:1,
@@ -978,7 +996,7 @@ const ITEMS = {
   },
   kitchen_bench: {
     name:"Kitchen Bench", station:"Machining Bench", output:1,
-    ingredients:[{item:"iron_ingot",qty:8},{item:"copper_nail",qty:20},{item:"epoxy",qty:20}]
+    ingredients:[{item:"refined_wood",qty:30},{item:"iron_ingot",qty:8},{item:"copper_nail",qty:20},{item:"epoxy",qty:20}]
   },
   canteen: {
     name:"Canteen", station:"Machining Bench", output:1,
@@ -1321,6 +1339,236 @@ const ITEMS = {
     name:"Flatbread Dough", station:"Herbalism Bench", output:1,
     ingredients:[{item:"flour",qty:3},{item:"water",qty:1}]
   },
+
+  // ── CAMPFIRE ───────────────────────────────────────────────────────────────
+  charcoal: {
+    name:"Charcoal", station:"Campfire", output:1,
+    ingredients:[{item:"wood",qty:1}]
+  },
+  flatbread: {
+    name:"Flatbread", station:"Campfire", output:1,
+    ingredients:[{item:"flatbread_dough",qty:1}]
+  },
+  cooked_meat: {
+    name:"Cooked Meat", station:"Campfire", output:1,
+    ingredients:[{item:"raw_meat",qty:1}]
+  },
+  cooked_giant_steak: {
+    name:"Cooked Giant Steak", station:"Campfire", output:1,
+    ingredients:[{item:"raw_giant_steak",qty:1}]
+  },
+  hot_coffee: {
+    name:"Hot Coffee", station:"Campfire", output:1,
+    ingredients:[{item:"coffee_bean",qty:40},{item:"liquid_container",qty:1}]
+  },
+  honey_tea: {
+    name:"Honey Tea", station:"Campfire", output:1,
+    ingredients:[{item:"honey",qty:5},{item:"liquid_container",qty:1}]
+  },
+  gorse_tea: {
+    name:"Gorse Tea", station:"Campfire", output:1,
+    ingredients:[{item:"gorse_flower",qty:40},{item:"liquid_container",qty:1}]
+  },
+  filtered_water: {
+    name:"Filtered Water", station:"Campfire", output:1,
+    ingredients:[{item:"water_container",qty:1}]
+  },
+
+  // ── CARPENTRY BENCH ────────────────────────────────────────────────────────
+  refined_wood: {
+    name:"Refined Wood", station:"Carpentry Bench", output:5,
+    ingredients:[{item:"wood",qty:1}]
+  },
+
+  // ── MORTAR & PESTLE — additions ────────────────────────────────────────────
+  vegetable_oil: {
+    name:"Vegetable Oil", station:"Mortar & Pestle", output:1,
+    ingredients:[{item:"seeds",qty:15}]
+  },
+
+  // ── DRYING RACK ────────────────────────────────────────────────────────────
+  cured_leather: {
+    name:"Cured Leather", station:"Drying Rack", output:1,
+    ingredients:[{item:"tree_sap",qty:2},{item:"leather",qty:6}]
+  },
+  drying_rack: {
+    name:"Drying Rack", station:"Crafting Bench", output:1,
+    ingredients:[{item:"wood",qty:50},{item:"stick",qty:25},{item:"fiber",qty:50}]
+  },
+
+  // ── MACHINING BENCH — additions ────────────────────────────────────────────
+  advanced_textiles_bench: {
+    name:"Advanced Textiles Bench", station:"Machining Bench", output:1,
+    ingredients:[{item:"iron_ingot",qty:20},{item:"wood",qty:6},{item:"epoxy",qty:8},{item:"rope",qty:4},{item:"steel_screw",qty:40}]
+  },
+  smoker: {
+    name:"Smoker", station:"Machining Bench", output:1,
+    ingredients:[{item:"iron_ingot",qty:20},{item:"copper_ingot",qty:10},{item:"concrete_mix",qty:15},{item:"steel_screw",qty:20},{item:"charcoal",qty:50}]
+  },
+
+  // ── FABRICATOR ─────────────────────────────────────────────────────────────
+  windmill: {
+    name:"Windmill", station:"Fabricator", output:1,
+    ingredients:[{item:"copper_nail",qty:4},{item:"steel_screw",qty:8},{item:"epoxy",qty:20},{item:"steel_ingot",qty:24},{item:"refined_wood",qty:30}]
+  },
+  water_wheel: {
+    name:"Water Wheel", station:"Fabricator", output:1,
+    ingredients:[{item:"epoxy",qty:10},{item:"stone",qty:12},{item:"wood",qty:20},{item:"rope",qty:24},{item:"iron_ingot",qty:40},{item:"iron_nail",qty:120}]
+  },
+  butchery_bench: {
+    name:"Butchery Bench", station:"Fabricator", output:1,
+    ingredients:[{item:"stone",qty:10},{item:"wood",qty:20},{item:"iron_ingot",qty:40}]
+  },
+  biofuel_generator: {
+    name:"Biofuel Generator", station:"Fabricator", output:1,
+    ingredients:[{item:"steel_ingot",qty:20},{item:"copper_wire",qty:40},{item:"electronics",qty:12},{item:"steel_screw",qty:20},{item:"glass",qty:2}]
+  },
+  titanium_plate: {
+    name:"Titanium Plate", station:"Fabricator", output:1,
+    ingredients:[{item:"titanium_ingot",qty:3}]
+  },
+  material_processor: {
+    name:"Material Processor", station:"Fabricator", output:1,
+    ingredients:[{item:"aluminum_ingot",qty:30},{item:"electronics",qty:60},{item:"steel_screw",qty:12},{item:"titanium_plate",qty:3},{item:"carbon_fiber",qty:8}]
+  },
+  electric_furnace: {
+    name:"Electric Furnace", station:"Fabricator", output:1,
+    ingredients:[{item:"steel_ingot",qty:30},{item:"glass",qty:4},{item:"electronics",qty:60},{item:"concrete_mix",qty:80},{item:"steel_screw",qty:8}]
+  },
+  electric_textiles_bench: {
+    name:"Electric Textiles Bench", station:"Fabricator", output:1,
+    ingredients:[{item:"epoxy",qty:8},{item:"iron_ingot",qty:20},{item:"steel_ingot",qty:20},{item:"stone",qty:150}]
+  },
+  organic_residue_cleanser: {
+    name:"Organic Residue Cleanser", station:"Fabricator", output:1,
+    ingredients:[{item:"iron_ingot",qty:5},{item:"rope",qty:10},{item:"copper_nail",qty:12},{item:"wood",qty:25}]
+  },
+
+  // ── MATERIAL PROCESSOR ─────────────────────────────────────────────────────
+  composite_paste: {
+    name:"Composite Paste", station:"Material Processor", output:1,
+    ingredients:[{item:"iron_ore",qty:2},{item:"silica_ore",qty:1},{item:"organic_resin",qty:1},{item:"platinum_ore",qty:1}]
+  },
+
+  // ── ELECTRIC FURNACE ───────────────────────────────────────────────────────
+  composites: {
+    name:"Composites", station:"Electric Furnace", output:1,
+    ingredients:[{item:"composite_paste",qty:1}]
+  },
+
+  // ── ADVANCED TEXTILES BENCH ────────────────────────────────────────────────
+  platinum_weave: {
+    name:"Platinum Weave", station:"Advanced Textiles Bench", output:1,
+    ingredients:[{item:"fiber",qty:30},{item:"platinum_sheath",qty:2}]
+  },
+  // Arctic Armor (T3)
+  arctic_head_armor: {
+    name:"Arctic Head Armor", station:"Advanced Textiles Bench", output:1,
+    ingredients:[{item:"cured_leather",qty:3},{item:"fur",qty:10},{item:"rope",qty:4},{item:"polar_bear_vestige",qty:1}]
+  },
+  arctic_chest_armor: {
+    name:"Arctic Chest Armor", station:"Advanced Textiles Bench", output:1,
+    ingredients:[{item:"cured_leather",qty:5},{item:"arctic_pelt",qty:8},{item:"fur",qty:20},{item:"rope",qty:6}]
+  },
+  arctic_arm_armor: {
+    name:"Arctic Arm Armor", station:"Advanced Textiles Bench", output:1,
+    ingredients:[{item:"cured_leather",qty:3},{item:"arctic_pelt",qty:4},{item:"fur",qty:8},{item:"rope",qty:2}]
+  },
+  arctic_leg_armor: {
+    name:"Arctic Leg Armor", station:"Advanced Textiles Bench", output:1,
+    ingredients:[{item:"cured_leather",qty:4},{item:"arctic_pelt",qty:6},{item:"fur",qty:16},{item:"rope",qty:6}]
+  },
+  arctic_feet_armor: {
+    name:"Arctic Feet Armor", station:"Advanced Textiles Bench", output:1,
+    ingredients:[{item:"cured_leather",qty:3},{item:"arctic_pelt",qty:2},{item:"fur",qty:8},{item:"rope",qty:2}]
+  },
+  // Hunter Armor (T3)
+  hunter_head_armor: {
+    name:"Hunter Head Armor", station:"Advanced Textiles Bench", output:1,
+    ingredients:[{item:"platinum_weave",qty:2},{item:"cured_leather",qty:3},{item:"epoxy",qty:8},{item:"rope",qty:4}]
+  },
+  hunter_chest_armor: {
+    name:"Hunter Chest Armor", station:"Advanced Textiles Bench", output:1,
+    ingredients:[{item:"platinum_weave",qty:5},{item:"cured_leather",qty:6},{item:"epoxy",qty:16},{item:"rope",qty:6}]
+  },
+  hunter_arms_armor: {
+    name:"Hunter Arms Armor", station:"Advanced Textiles Bench", output:1,
+    ingredients:[{item:"platinum_weave",qty:2},{item:"cured_leather",qty:4},{item:"epoxy",qty:4}]
+  },
+  hunter_legs_armor: {
+    name:"Hunter Legs Armor", station:"Advanced Textiles Bench", output:1,
+    ingredients:[{item:"platinum_weave",qty:4},{item:"cured_leather",qty:4},{item:"epoxy",qty:8},{item:"rope",qty:6}]
+  },
+  hunter_feet_armor: {
+    name:"Hunter Feet Armor", station:"Advanced Textiles Bench", output:1,
+    ingredients:[{item:"platinum_weave",qty:1},{item:"cured_leather",qty:2},{item:"epoxy",qty:4},{item:"rope",qty:4}]
+  },
+
+  // ── ELECTRIC TEXTILES BENCH ────────────────────────────────────────────────
+  // Composite Armor (T4)
+  composite_head_armor: {
+    name:"Composite Head Armor", station:"Electric Textiles Bench", output:1,
+    ingredients:[{item:"aluminum_ingot",qty:4},{item:"composites",qty:12},{item:"steel_screw",qty:6},{item:"carbon_fiber",qty:2}]
+  },
+  composite_chest_armor: {
+    name:"Composite Chest Armor", station:"Electric Textiles Bench", output:1,
+    ingredients:[{item:"aluminum_ingot",qty:6},{item:"composites",qty:24},{item:"steel_screw",qty:12},{item:"carbon_fiber",qty:2}]
+  },
+  composite_arms_armor: {
+    name:"Composite Arms Armor", station:"Electric Textiles Bench", output:1,
+    ingredients:[{item:"aluminum_ingot",qty:2},{item:"composites",qty:8},{item:"steel_screw",qty:6},{item:"carbon_fiber",qty:2}]
+  },
+  composite_legs_armor: {
+    name:"Composite Legs Armor", station:"Electric Textiles Bench", output:1,
+    ingredients:[{item:"aluminum_ingot",qty:6},{item:"composites",qty:18},{item:"steel_screw",qty:8},{item:"carbon_fiber",qty:2}]
+  },
+  composite_feet_armor: {
+    name:"Composite Feet Armor", station:"Electric Textiles Bench", output:1,
+    ingredients:[{item:"aluminum_ingot",qty:4},{item:"composites",qty:12},{item:"steel_screw",qty:6},{item:"carbon_fiber",qty:2}]
+  },
+  // Obsidian Armor T4 (Electric Textiles Bench — Prometheus exclusive)
+  obsidian_t4_head_armor: {
+    name:"Obsidian Head Armor (T4)", station:"Electric Textiles Bench", output:1,
+    ingredients:[{item:"platinum_weave",qty:10},{item:"composites",qty:5},{item:"steel_screw",qty:5},{item:"shaped_obsidian",qty:5}]
+  },
+  obsidian_t4_chest_armor: {
+    name:"Obsidian Chest Armor (T4)", station:"Electric Textiles Bench", output:1,
+    ingredients:[{item:"platinum_weave",qty:15},{item:"composites",qty:8},{item:"steel_screw",qty:6},{item:"shaped_obsidian",qty:15}]
+  },
+  obsidian_t4_arms_armor: {
+    name:"Obsidian Arms Armor (T4)", station:"Electric Textiles Bench", output:1,
+    ingredients:[{item:"platinum_weave",qty:5},{item:"composites",qty:3},{item:"steel_screw",qty:2},{item:"shaped_obsidian",qty:5}]
+  },
+  obsidian_t4_legs_armor: {
+    name:"Obsidian Legs Armor (T4)", station:"Electric Textiles Bench", output:1,
+    ingredients:[{item:"platinum_weave",qty:12},{item:"composites",qty:2},{item:"steel_screw",qty:3},{item:"shaped_obsidian",qty:12}]
+  },
+  obsidian_t4_feet_armor: {
+    name:"Obsidian Feet Armor (T4)", station:"Electric Textiles Bench", output:1,
+    ingredients:[{item:"platinum_weave",qty:3},{item:"composites",qty:2},{item:"steel_screw",qty:3},{item:"shaped_obsidian",qty:5}]
+  },
+
+  // ── TEXTILES BENCH — Sandworm Armor ───────────────────────────────────────
+  sandworm_head_armor: {
+    name:"Sandworm Head Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"bone",qty:5},{item:"leather",qty:10},{item:"sandworm_scale",qty:10}]
+  },
+  sandworm_chest_armor: {
+    name:"Sandworm Chest Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"bone",qty:25},{item:"leather",qty:12},{item:"sandworm_scale",qty:20}]
+  },
+  sandworm_arms_armor: {
+    name:"Sandworm Arms Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"bone",qty:5},{item:"leather",qty:4},{item:"sandworm_scale",qty:6}]
+  },
+  sandworm_leg_armor: {
+    name:"Sandworm Leg Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"bone",qty:15},{item:"leather",qty:9},{item:"sandworm_scale",qty:10}]
+  },
+  sandworm_feet_armor: {
+    name:"Sandworm Feet Armor", station:"Textiles Bench", output:1,
+    ingredients:[{item:"bone",qty:5},{item:"leather",qty:6},{item:"sandworm_scale",qty:6}]
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1451,7 +1699,7 @@ function renderResults() {
   // STATION STEPS
   const stepsEl = document.getElementById('steps-section');
   // Order stations logically
-  const stationOrder = ['Character','Crafting Bench','Mortar & Pestle','Stone Furnace','Furnace','Concrete Furnace','Anvil Bench','Machining Bench','Textiles Bench','Herbalism Bench','Decoration Bench','Cement Mixer','Carpentry Bench','Kitchen Bench','Fabricator'];
+  const stationOrder = ['Character','Crafting Bench','Campfire','Mortar & Pestle','Stone Furnace','Furnace','Concrete Furnace','Cement Mixer','Carpentry Bench','Drying Rack','Anvil Bench','Machining Bench','Textiles Bench','Herbalism Bench','Advanced Textiles Bench','Electric Textiles Bench','Decoration Bench','Kitchen Bench','Fabricator','Material Processor','Electric Furnace','Masonry Bench'];
   const stations = Object.keys(stationMap).sort((a,b) => {
     const ai = stationOrder.indexOf(a), bi = stationOrder.indexOf(b);
     if (ai === -1 && bi === -1) return a.localeCompare(b);
